@@ -1,0 +1,385 @@
+//list.h
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+typedef int DataType;
+typedef struct LinkNode
+{
+	DataType data;
+	struct LinkNode *next;
+}LinkNode,*qLinkNode;
+
+typedef struct LinkList
+{
+	LinkNode *phead;  //头结点
+	LinkNode *tail;   //尾节点
+}LinkList,*qLinkList;
+
+//初始化链表
+void InitLinkList(qLinkList head)
+{
+	assert(head->phead);
+	head->phead=NULL;	
+	head->tail=NULL;
+}
+
+//获取新节点
+qLinkNode GetNode(DataType x)
+{
+	qLinkNode newnode=(qLinkNode)malloc(sizeof(LinkNode));
+	newnode->data=x;
+	newnode->next=NULL;
+	return newnode;
+}
+
+//头插
+void push_front(qLinkList head,DataType x)
+{
+	qLinkNode newnode=GetNode(x);
+	if(head->phead == NULL)
+	{
+		head->phead=newnode;
+		head->tail=newnode;
+	}
+	else
+	{
+		newnode->next=head->phead;
+		head->phead=newnode;
+	}
+}
+
+//头删
+void pop_front(qLinkList head)
+{
+	qLinkNode del=NULL;
+	if(head->phead == NULL)
+	{
+		printf("LinkList is NULL!\n");
+		return;
+	}
+	else if(head->phead == head->tail)
+	{
+		free(head->phead);
+		free(head->tail);
+		head->phead=NULL;
+		head->tail=NULL;
+	}
+	else
+	{
+		del=head->phead;
+		head->phead=head->phead->next;
+		free(del);
+		del=NULL;
+	}
+}
+
+//尾插
+void push_back(qLinkList head,DataType x)
+{
+	qLinkNode newnode=GetNode(x);
+	if(head->phead == NULL)
+	{
+		head->phead=newnode;
+		head->tail=newnode;
+	}
+	else
+	{
+		head->tail->next=newnode;
+		head->tail=newnode;
+	}
+}
+
+//尾删
+void pop_back(qLinkList head)
+{
+	qLinkNode cur=head->phead;
+	qLinkNode del=NULL;
+	if(head->phead == NULL)
+	{
+		printf("LinkList is NULL!\n");
+		return;
+	}
+	else if(head->phead == head->tail)
+	{
+		free(head->phead);
+		free(head->tail);
+		head->phead=NULL;
+		head->tail=NULL;
+	}
+	else
+	{
+		while(cur->next != head->tail)
+		{
+			cur=cur->next;
+		}
+		del=head->tail;
+		head->tail=cur;
+		head->tail->next=NULL;
+		head->tail=NULL;
+		free(del);
+		del=NULL;
+	}
+}
+
+//查找节点
+qLinkNode Find(qLinkList head,DataType x)
+{
+	qLinkNode cur=head->phead;
+	while(cur)
+	{
+		if(cur->data == x)
+		{
+			printf("Exit!\n");
+			return cur;
+		}
+		cur=cur->next;
+	}
+	printf("Not Exit Or LinkList Is NULL\n");
+	return NULL;
+}
+
+//插入节点
+void InsertLinkNode(qLinkNode pos,DataType x)
+{
+	assert(pos);
+	qLinkNode newnode=GetNode(x);
+	newnode->next=pos->next;
+	pos->next=newnode;
+	printf("Insertion Is uccessful!\n");
+}
+
+//冒泡排序
+void BubbleSort(qLinkList head)
+{
+	assert(head->phead);
+	qLinkNode front=head->phead;
+	qLinkNode back=head->phead;
+	while(front != head->tail)
+	{
+		back=front->next;
+		while(back)
+		{
+			if(front->data > back->data)
+			{
+				DataType x=front->data;
+				front->data=back->data;
+				back->data=x;
+			}
+			back=back->next;
+		}
+		front=front->next;
+	}
+}
+
+//删除节点(默认该节点只有一个)
+void RemoveLinkNode(qLinkList head,DataType x)
+{
+	assert(head->phead);
+	qLinkNode prev=head->phead;
+	qLinkNode del=head->phead;
+	qLinkNode cur=head->phead;
+	while(cur)
+	{
+		if(cur->data == x)
+		{
+			head->phead=head->phead->next;
+			 free(del);
+			 del=NULL;
+			 printf("Removal Is Successful!\n");
+			 return;
+		}
+		cur=cur->next;
+		while(cur)
+		{
+			if(cur->data == x)
+			{
+				prev->next=cur->next;
+				free(cur);
+				cur=NULL;
+			    printf("Removal Is Successful!\n");
+				return;
+			}
+			prev=cur;
+			cur=cur->next;
+		}
+	}
+	printf("Removal Is Unsuccessful\n");
+}
+
+//删除多个相同节点
+void RemoveAllLinkNode(qLinkList head,DataType x)
+{
+	assert(head->phead);
+	qLinkNode cur=head->phead;
+	qLinkNode prev=NULL;
+	qLinkNode del=NULL;
+	while(cur)  
+	{
+		del=head->phead;
+		if(cur->data == x)
+		{
+			cur=cur->next;
+			head->phead=head->phead->next;
+			free(del);
+			del=NULL;
+			continue;
+		}
+		prev=cur;
+		cur=cur->next;
+		while(cur)
+		{
+			if(cur->data == x)
+			{
+				prev->next=cur->next;
+				free(cur);
+				cur=NULL;
+				cur=prev;
+			}
+			prev=cur;
+			cur=cur->next;
+		}
+	}
+	printf("Removal Is Unsuccessful\n");
+}
+
+//打印链表
+void PrintLinkList(qLinkList head)
+{
+	qLinkNode cur=head->phead;
+	if(cur == NULL)
+	{
+		printf("LinkList is NULL!\n");
+		return;
+	}
+	while(cur)
+	{
+		printf("%d->",cur->data);
+		cur=cur->next;
+	}
+	printf("over\n");
+}
+
+//销毁链表
+void DestroyLinkList(qLinkList head)
+{
+	qLinkNode del=NULL;
+	if(head->phead == NULL)
+	{
+		return;
+	}
+	while(head->phead != head->tail)
+	{
+		del=head->phead;
+		head->phead=head->phead->next;
+		free(del);
+		del=NULL;
+	}
+	free(head->phead);
+	head->phead=NULL;
+}
+
+//test.cpp
+#include "list.h"
+
+void InitLinkList(qLinkList head);
+qLinkNode GetNode(DataType x);
+void push_front(qLinkList head,DataType x);
+void pop_front(qLinkList head);
+void push_back(qLinkList head,DataType x);
+void pop_back(qLinkList head);
+qLinkNode Find(qLinkList head,DataType x);
+void InsertLinkNode(qLinkNode pos,DataType x);
+void BubbleSort(qLinkList head);
+void RemoveLinkNode(qLinkList head,DataType x);
+void RemoveAllLinkNode(qLinkList head,DataType x);
+void PrintLinkList(qLinkList head);
+void DestroyLinkList(qLinkList head);
+
+int main()
+{
+	LinkList q;
+	InitLinkList(&q);
+	qLinkNode node;
+	printf("\t*****************单链表基本操作*****************\n");
+	printf("\t*                   1.头插                     *\n");
+	printf("\t*                   2.头删                     *\n");
+	printf("\t*                   3.尾插                     *\n");
+	printf("\t*                   4.尾删                     *\n");
+	printf("\t*                 5.查找节点                   *\n");
+	printf("\t*            6.插入节点(固定位置)              *\n");
+	printf("\t*                7.排序(冒泡)                  *\n");
+	printf("\t*              8.删除唯一节点                  *\n");
+	printf("\t*            9.删除多个相同节点                *\n");
+	printf("\t*              10.打印单链表                   *\n");
+	printf("\t***************11.销毁单链表********************\n");
+	int input=1;
+	while(input)
+	{
+		int n,x,_x;
+		printf("Input The Number:");
+		scanf("%d",&n);
+		if(n > 11)
+		{
+			break;
+		}
+		switch(n)
+		{
+		case 1:
+			printf("Input the data(front):");
+			scanf("%d",&x);
+			push_front(&q,x);
+			break;
+		case 2:
+			pop_front(&q);
+			break;
+		case 3:
+			printf("Input the data(back):");
+			scanf("%d",&x);
+			push_back(&q,x);
+			break;
+		case 4:
+			pop_back(&q);
+			break;
+		case 5:
+			printf("Input the found data:");
+			scanf("%d",&x);
+			node=Find(&q,x);
+			if(NULL != node)
+				printf("%d\n",node->data);
+			break;
+		case 6:
+			printf("Input the position data:");
+			scanf("%d",&x);
+			node=Find(&q,x);
+			if(NULL != node)
+			{
+				printf("Input the insert data:");
+			    scanf("%d",&_x);
+			    InsertLinkNode(node,_x);
+			}
+			break;
+		case 7:
+			BubbleSort(&q);
+			break;
+		case 8:
+			printf("Input the removed data:");
+			scanf("%d",&x);
+			RemoveLinkNode(&q,x);
+			break;
+		case 9:
+			printf("Input the removed data:");
+			scanf("%d",&x);
+			RemoveAllLinkNode(&q,x);
+			break;
+		case 10:
+			 PrintLinkList(&q);
+			 break;
+		case 11:
+			DestroyLinkList(&q);
+			break;
+		}
+	}
+	system("pause");
+	return 0;
+}
