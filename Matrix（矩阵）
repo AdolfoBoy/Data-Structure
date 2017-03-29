@@ -1,0 +1,225 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template<class T>
+//对称矩阵
+class SymmeticMatrix
+{
+public:
+	//构造函数，实现对称矩阵初始化
+	SymmeticMatrix(T* Array,size_t sz)
+		:_sz(sz*(sz+1)/2-1)
+		,_array(new T[_sz])
+		,_n(sz)
+	{
+		size_t index=0;
+		for(int i=0;i<sz;i++)
+		{
+			for(int j=0;j<=i;j++)
+			{
+				_array[index]=Array[i*sz+j];
+				index++;
+			}
+		}
+	}
+
+	~SymmeticMatrix()
+	{
+		if(NULL == _array)
+		{
+			delete[] _array;
+			_sz=0;
+			_n=0;
+		}
+	}
+
+	//获取对称矩阵元素
+	T& Access(size_t i,size_t j)
+	{
+		if(i<j)
+		{
+			swap(i,j);
+		}
+		return _array[i*(i+1)/2+j];
+	}
+
+	//打印对称矩阵
+	void Print()
+	{
+		for(int i=0;i<_n;i++)
+		{
+			for(int j=0;j<_n;j++)
+			{
+				if(i>=j)
+				{
+					cout<<_array[i*(i+1)/2+j]<<" ";
+				}
+				else
+				{
+					cout<<_array[j*(j+1)/2+i]<<" ";
+					//break;
+				}
+			}
+			cout<<endl;
+		}
+	}
+private:
+	size_t _sz;
+	T* _array;
+	size_t _n;
+};
+
+template<class T>
+//三元组，利用三元组存放稀疏矩阵的数据以及该数据所在行和列
+struct Triple
+{
+	T _value;    //元素值
+	size_t _row; //元素所在行
+	size_t _col; //元素所在列
+
+	Triple(const T& value = T(), 
+		size_t row = 0, size_t col = 0)
+		:_value(value)
+		,_row(row)
+		,_col(col)
+	{}
+};
+
+template<class T>
+//稀疏矩阵
+class SparseMatrix
+{
+public:
+	SparseMatrix()
+		:_colSize(0)
+		,_rowSize(0)
+	{}
+
+	//构造函数
+	SparseMatrix(T* a, size_t m, size_t n, const T& invalid) //invalid表示稀疏矩阵无效值
+		:_rowSize(m)
+		,_colSize(n)
+		,_invalid(invalid)
+	{
+		for (size_t i = 0; i < m; ++i)
+		{
+			for (size_t j = 0; j < n; ++j)
+			{
+				if (a[i*n+j] != invalid)
+				{
+					_a.push_back(Triple<T>(a[i*n+j], i, j));
+				}
+			}
+		}
+	}
+
+	void Display()
+	{
+		size_t index = 0;
+		for (size_t i = 0; i < _rowSize; ++i)
+		{
+			for (size_t j = 0; j < _colSize; ++j)
+			{
+				if (index < _a.size() 
+					&&_a[index]._row == i 
+					&& _a[index]._col == j)
+				{
+					cout<<_a[index]._value<<" ";
+					++index;
+				}
+				else
+				{
+					cout<<_invalid<<" ";
+				}
+			}
+
+			cout<<endl;
+		}
+
+		cout<<endl;
+	}
+
+	//稀疏矩阵一般转置，时间复杂度O(colSize*有效数据的个数)
+	SparseMatrix<T> Transport()
+	{
+		SparseMatrix<T> tmp;
+		tmp._colSize = _rowSize;
+		tmp._rowSize = _colSize;
+		tmp._invalid = _invalid;
+
+		for (size_t i = 0; i < _colSize; ++i)
+		{
+			size_t index = 0;
+			while (index < _a.size())
+			{
+				if (_a[index]._col == i)
+				{
+					Triple<T> t;
+					t._value = _a[index]._value;
+					t._row = _a[index]._col;
+					t._col = _a[index]._row;
+
+					tmp._a.push_back(t);
+				}
+
+				++index;
+			}
+		}
+
+		return tmp;
+	}
+
+	//稀疏矩阵快速转置
+	SparseMatrix<T> FastTransport()
+	{
+		SparseMatrix<T> tmp;
+		tmp._colSize = _rowSize;
+		tmp._rowSize = _colSize;
+		tmp._invalid = _invalid;
+
+		int* rowCounts = new int[_colSize];
+		int* rowStart = new int[_colSize];
+		memset(rowCounts, 0, sizeof(int)*_colSize);
+		memset(rowStart, 0, sizeof(int)*_colSize);
+
+		size_t index = 0;
+		while (index < _a.size())
+		{
+			rowCounts[_a[index]._col]++;
+			++index;
+		}
+		rowStart[0] = 0;
+		for (size_t i = 1; i < _colSize; ++i)
+		{
+			rowStart[i] = rowStart[i-1] + rowCounts[i-1];
+		}
+
+		index = 0;
+		
+		//tmp._a.reserve(_a.size());
+		tmp._a.resize(_a.size());
+
+		while (index < _a.size())
+		{
+			size_t rowIndex = _a[index]._col;
+			int& start = rowStart[rowIndex];
+
+			Triple<T> t;
+			t._value = _a[index]._value;
+			t._row = _a[index]._col;
+			t._col = _a[index]._row;
+			tmp._a[start++] = t;
+
+			++index;
+
+		}
+		return tmp;
+	}
+
+protected:
+	vector<Triple<T>> _a;
+	size_t _rowSize;
+	size_t _colSize;
+	T _invalid;
+};
