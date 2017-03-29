@@ -1,0 +1,263 @@
+#include <iostream>
+#include <assert.h>
+using namespace std;
+
+enum Type
+{
+	HEAD_TYPE,
+	VALUE_TYPE,
+	SUB_TYPE,
+};
+
+struct GeneralizedNode
+{
+	Type _type;
+	GeneralizedNode* _next;
+
+	union
+	{
+		char _value;
+		GeneralizedNode* _subLink;
+	};
+
+	GeneralizedNode(Type type = HEAD_TYPE, char value = 0)
+		:_type(type)
+		,_next(NULL)
+	{
+		if (_type == VALUE_TYPE)
+		{
+			_value = value;
+		}
+		else if (_type == SUB_TYPE)
+		{
+			_subLink = NULL;
+		}
+	}
+};
+
+class Generalized
+{
+	typedef GeneralizedNode Node;
+public:
+	Generalized()
+		:_head(new Node(HEAD_TYPE))
+	{}
+
+	Generalized(const char* str)
+	{
+		_head = _CreateLized(str);
+	}
+
+	Generalized(const Generalized& g)
+	{
+		_head = _Copy(g._head);
+	}
+
+	//赋值运算符重载函数现代写法
+	Generalized& operator= (Generalized g)
+	{
+		swap(this->_head, g._head);
+		return *this;
+	}
+
+	~Generalized()
+	{
+		_Destory(_head);
+		_head = NULL;
+	}
+
+	//打印广义表
+	void Print()
+	{
+		_Print(_head);
+		cout<<endl;
+	}
+
+	//求广义表元素个数
+	size_t Size()
+	{
+		return _Size(_head);
+	}
+
+	//求广义表深度
+	size_t Depth()
+	{
+		return _Depth(_head);
+	}
+
+protected:
+	//对已有广义表复制，便于实现拷贝构造函数和赋值运算符重载函数
+	Node* _Copy(Node* head)
+	{
+		Node* newHead = new Node(HEAD_TYPE);
+		assert(head->_type == HEAD_TYPE);
+
+		Node* cur = head->_next;
+		Node* newCur = newHead;
+
+		while (cur)
+		{
+			if (cur->_type == VALUE_TYPE)
+			{
+				newCur->_next = new Node(VALUE_TYPE, cur->_value);
+				newCur = newCur->_next;
+			}
+			else if (cur->_type == SUB_TYPE)
+			{
+				newCur->_next = new Node(SUB_TYPE);
+				newCur = newCur->_next;
+
+				newCur->_subLink = _Copy(cur->_subLink);
+			}
+
+			cur = cur->_next;
+		}
+
+		return newHead;
+	}
+
+	//对广义表销毁，便于完成析构函数
+	void _Destory(Node* head)
+	{
+		Node* cur = head;
+		while (cur)
+		{
+			Node*del = cur;
+			cur = cur->_next;
+
+			if (del->_type == SUB_TYPE)
+			{
+				_Destory(del->_subLink);
+			}
+
+			delete del;
+		}
+	}
+
+	bool _IsValue(char ch)
+	{
+		if ((ch >= '0' && ch <= '9')
+			|| (ch >= 'a' && ch <= 'z')
+			|| (ch >= 'A' && ch <= 'Z'))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	//创建广义表（递归实现）
+	Node* _CreateLized(const char* & str)
+	{
+		assert(str && *str == '(');
+		++str;
+		Node* head = new Node(HEAD_TYPE);
+		Node* cur = head;
+
+		while (*str)
+		{
+			if (_IsValue(*str))
+			{
+				cur->_next = new Node(VALUE_TYPE, *str);
+				cur = cur->_next;
+				++str;
+			}
+			else if (*str == '(')
+			{
+				cur->_next = new Node(SUB_TYPE);
+				cur = cur->_next;
+				cur->_subLink = _CreateLized(str);
+			}
+			else if (*str == ')')
+			{
+				++str;
+				return head;
+			}
+			else
+			{
+				++str;
+			}
+		}
+		
+		assert(false);
+		return head;
+	}	
+
+	void _Print( Node* head)
+	{
+		Node* cur = head;
+		while(cur)
+		{
+			if (cur->_type == HEAD_TYPE)
+			{
+				cout<<"(";
+			}
+			else if (cur->_type == VALUE_TYPE)
+			{
+				cout<<cur->_value;
+				if (cur->_next)
+				{
+					cout<<",";
+				}
+			}
+			else
+			{
+				_Print(cur->_subLink);
+				if (cur->_next)
+				{
+					cout<<",";
+				}
+			}
+
+			cur = cur->_next;
+		}
+
+		cout<<")";
+	}
+
+	size_t _Size(Node* head)
+	{
+		size_t size = 0;
+		Node* cur = head;
+		while (cur)
+		{
+			if (cur->_type == VALUE_TYPE)
+			{
+				++size;
+			}
+			else if (cur->_type == SUB_TYPE)
+			{
+				size += _Size(cur->_subLink);
+			}
+
+			cur = cur->_next;
+		}
+
+		return size;
+	}
+
+	size_t _Depth(Node* head)
+	{
+		int depth = 1;
+		Node* cur = head;
+		while (cur)
+		{
+			if (cur->_type == SUB_TYPE)
+			{
+				int subDepth = _Depth(cur->_subLink);
+				if (subDepth+1 > depth)
+				{
+					depth = subDepth+1;
+				}
+			}
+			
+			cur = cur->_next;
+		}
+
+		return depth;
+	}
+protected:
+	Node* _head;
+};
