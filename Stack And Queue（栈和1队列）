@@ -1,0 +1,202 @@
+#include <iostream>
+#include <assert.h>
+using namespace std;
+
+//Stack  implementation
+template<class T>
+class Stack
+{
+public:
+	Stack()
+		:a(NULL)
+		,_top(0)
+		,capacity(0)
+	{}
+	
+	~Stack()
+	{
+		if(a!=NULL)
+		{
+			delete[] a;
+		}
+	}
+
+	Stack(const Stack<T>& s)
+		:a(s.a)
+		,capacity(s._top)
+		,_top(s._top)
+	{
+		s.a=NULL;
+	}
+	
+	Stack<T>& operator=(const Stack<T>& s)
+	{
+		if(this!=&s)
+		{
+			swap(a,s.a);
+			capacity=s.capacity;
+			_top=s._top;
+		}
+		return *this;
+	}
+	
+	void Push(const T& d)
+	{
+		_CheckCapacity();
+		a[_top++] = d;
+	}
+
+	void Pop()  
+	{
+		if(_top!=0)
+		{
+			_top--;
+		}
+	}
+
+	T& top()
+	{
+		return a[_top-1];
+	}
+
+	bool Empty()
+	{
+		if(_top==0)
+			return true;
+	}
+
+	size_t Size()
+	{
+		return _top;
+	}
+
+	
+protected:
+	void _CheckCapacity()  
+	{
+		int i;
+		if(_top==capacity)
+		{
+			capacity=2*capacity+3;
+			T* tmp=new T[capacity];
+			for(i=0;i<(_top);i++)
+			{
+				tmp[i]=a[i];
+			}
+			delete[] a;
+			a=tmp;
+		}
+	}
+private:
+	T* a;
+	size_t _top;
+	size_t capacity;
+};
+
+
+//Queue  implementation
+template<class T>
+struct Node
+{
+	Node(const T&d)
+		:_data(d)
+		,next(NULL)
+	{
+	}
+	T _data;
+	Node<T> *next;
+};
+
+template<class T>
+class Queue
+{
+public:
+	Queue()
+		:_head(NULL)
+		,_tail(NULL)
+		,m(0)
+	{ }
+	
+	~Queue()
+	{
+		if(_head!=NULL)
+		{
+			Node<T> *cur=_head;
+			Node<T> *del=NULL;
+			while(cur)
+			{
+				del=cur;
+				cur=cur->next;
+				delete del;
+				del=NULL;
+				
+			}
+		}
+	}
+	void Push(const T& x)
+	{
+		Node<T>* NewNode=new Node<T>(x);
+		if(_head==NULL)
+		{
+			_head=_tail=NewNode;
+			
+		}
+		else
+		{
+			NewNode->next=_head;
+			_head=NewNode;
+		}
+		m++;
+	}
+
+	void Pop()
+	{
+		Node<T> *del=NULL;
+		if(_head==NULL)
+		{
+			return;
+		}
+		else if(_head==_tail)
+		{
+			delete _head;
+			_head=NULL;
+		}
+		else
+		{
+			del=_head;
+			_head=_head->next;
+			delete del;
+			del=NULL;
+		}
+		m--;
+	}
+
+	T& Front()
+	{
+		assert(_head);
+		return _head->_data;
+	}
+
+	T& Back()
+	{
+		assert(_head);
+		return _tail->_data;
+	}
+
+	bool Empty()
+	{
+		if(_head==NULL)
+			return true;
+	}
+
+	size_t Size()
+	{
+		assert(_head);
+		return m;
+	}
+
+protected:
+	Node<T>* _head;
+	Node<T>* _tail;
+	size_t m;
+};
