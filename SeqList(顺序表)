@@ -1,0 +1,167 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#define MAX 100
+
+typedef int DateType;
+typedef struct List
+{
+	int a[MAX];
+	int size;  //size动态变化
+}SeqList,*pSeqList;
+
+void InitSeqList(pSeqList pSeq)
+{
+	memset(pSeq->a,0,sizeof(pSeq->a));  //指针，移动
+	pSeq->size=0;
+}
+
+void PrintSeqList(SeqList Seq)
+{
+	int i;
+	for(i=0;i<Seq.size;i++)
+	{
+		printf("%d ",Seq.a[i]);
+	}
+	printf("\n");
+}
+
+void PushBack(pSeqList pSeq,DateType x)
+{
+	int i=0;
+	if(pSeq->size>MAX)
+	{
+		printf("顺序表已满!\n");
+		return;
+	}
+	pSeq->a[pSeq->size++]=x;
+}
+
+void TopBack(pSeqList pSeq)
+{
+	int i=0;
+	if(pSeq->size<=0)
+	{
+		printf("顺序表已空！\n");
+		return;
+	}
+	for(i=pSeq->size-1;i=0;i--)
+	{
+		pSeq->a[i]=pSeq->a[i-1];
+	}
+	pSeq->size--;
+}
+
+void PushFront(pSeqList pSeq,DateType x)
+{
+	int i=0;
+	if(pSeq->size>MAX)
+	{
+		printf("顺序表已满!\n");
+		return;
+	}
+	for(i=pSeq->size;i>0;i--)
+	{
+		pSeq->a[i]=pSeq->a[i-1];
+	}
+	pSeq->a[0]=x;
+	pSeq->size++;
+}
+
+void TopFront(pSeqList pSeq)
+{
+	int i=0;
+	if(pSeq->size<=0)
+	{
+		printf("顺序表已空！\n");
+		return;
+	}
+	for(i=0;i<pSeq->size;i++)
+	{
+		pSeq->a[i]=pSeq->a[i+1];
+	}
+	pSeq->size--;
+}
+
+void Insert(pSeqList pSeq,int pos,DateType x)
+{
+	int i=0;
+	if(pSeq->size>MAX)
+	{
+		printf("顺序表已满!\n");
+		return;
+	}
+	if(pos>pSeq->size)
+	{
+		printf("插入位设置不合理！\n");
+		return;
+	}
+	else
+	{
+		pSeq->size++;
+		for(i=pSeq->size;i>0;i--)
+		{
+			pSeq->a[i]=pSeq->a[i-1];
+		}
+		pSeq->a[pos-1]=x;
+	}
+}
+
+int Find(SeqList Seq,DateType x)
+{
+	int i;
+	for(i=0;i<Seq.size;i++)
+	{
+		if(Seq.a[i]==x)
+			return i;
+	}
+    return -1;
+}
+
+void Remove(pSeqList pSeq,DateType x)
+{
+	int m=0,i;
+	m=Find(*pSeq,x);
+	if(pSeq->size<=0)
+	{
+		printf("顺序表已空!\n");
+		return;
+	}
+	if(m==-1)
+	{
+		printf("删除元素不存在！\n");
+		return;
+	}
+	else
+	{
+		for(i=m;i<=pSeq->size;i++)
+		{
+			pSeq->a[i]=pSeq->a[i+1];
+		}
+		pSeq->size--;
+	}
+}
+
+void RemoveAll(pSeqList pSeq,DateType x)
+{
+	int m=0,i,n=0;
+	if(pSeq->size<=0)
+	{
+		printf("顺序表已空!\n");
+		return;
+	}
+	while(n<pSeq->size)
+	{
+		m=Find(*pSeq,x);
+		if(m!=-1)
+		{
+		for(i=m;i<=pSeq->size;i++)
+		{
+			pSeq->a[i]=pSeq->a[i+1];
+		}
+		pSeq->size--;
+		}
+		n++;
+	}
+}
