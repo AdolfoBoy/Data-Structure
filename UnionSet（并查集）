@@ -1,0 +1,57 @@
+#include <iostream>
+using namespace std;
+
+class UnionSet
+{
+public:
+	UnionSet(int n)
+		:a(new int[n])
+	{
+		/*int* a=new int[n];*/
+		for(int i=0;i<n;i++)
+		{
+			a[i]=-1;
+		}
+	}
+
+	~UnionSet()
+	{
+		if(a != NULL)
+			delete a;
+	}
+
+	int FindRoot(int x)
+	{
+		int root=x;
+		while(a[root] >= 0)
+		{
+			root--;
+		/*	root=a[root];*/
+		}
+		return root;
+	}
+
+	void Union(int root1,int root2)
+	{
+		int _root1=FindRoot(root1);
+		int _root2=FindRoot(root2);
+		if(root1 != root2)
+		{
+			a[_root1]+=a[_root2];
+		    a[_root2]=_root1;
+		}
+	}
+
+	int count(int n)
+	{
+		int count=0;
+		for(int i=0;i<n;i++)
+		{
+			if(a[i] < 0)
+				count++;
+		}
+		return count-1;
+	}
+private:
+	int *a;
+};
